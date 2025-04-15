@@ -1,0 +1,53 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import pywhatkit
+
+# Initialize speech engine
+engine = pyttsx3.init()
+engine.setProperty('rate', 150)  # Speed of speech
+
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("🎙️ Listening...")
+        audio = recognizer.listen(source)
+    try:
+        command = recognizer.recognize_google(audio)
+        print(f"🗣️ You said: {command}")
+        return command.lower()
+    except sr.UnknownValueError:
+        talk("Sorry, I didn't catch that.")
+        return ""
+    except sr.RequestError:
+        talk("Sorry, there's a problem with the speech service.")
+        return ""
+
+def run_assistant():
+    talk("Hello! I'm your voice assistant. How can I help you?")
+    while True:
+        command = listen()
+
+        if 'hello' in command:
+            talk("Hi there! How can I assist you today?")
+        elif 'time' in command:
+            now = datetime.datetime.now().strftime('%I:%M %p')
+            talk(f"The current time is {now}")
+        elif 'date' in command:
+            today = datetime.datetime.now().strftime('%B %d, %Y')
+            talk(f"Today's date is {today}")
+        elif 'search' in command:
+            query = command.replace('search', '')
+            talk(f"Searching for {query}")
+            pywhatkit.search(query)
+        elif 'stop' in command or 'exit' in command:
+            talk("Goodbye!")
+            break
+        else:
+            talk("I can’t do that yet. Try something else.")
+
+run_assistant()
